@@ -1,4 +1,6 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from final.users.models import CustomUsers
 
 
 class TeacherGroup(models.Model):
@@ -30,8 +32,7 @@ class Word(models.Model):
 
 class Test(models.Model):
     name = models.CharField(max_length=255)
-    status = models.BooleanField(default=False)
-    lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE)
+    lesson = models.OneToOneField('Lesson', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -39,9 +40,15 @@ class Test(models.Model):
 
 class TestQuestion(models.Model):
     original_word = models.CharField(max_length=255)
-    user_translation = models.CharField(max_length=255)
-    is_correct = models.BooleanField(default=False)
+    corect_answer = models.CharField(max_length=225)
     test = models.ForeignKey('Test', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.original_word
+
+
+class TestResult(models.Model):
+    user = models.ForeignKey(CustomUsers, on_delete=models.CASCADE)
+    test = models.ForeignKey('Test', on_delete=models.CASCADE)
+    mark = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(100)])
+

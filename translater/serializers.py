@@ -30,3 +30,9 @@ class TestQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TestQuestion
         fields = '__all__'
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Word
+        fields = 'id original_word'.split()
