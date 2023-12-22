@@ -16,6 +16,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
@@ -34,9 +35,20 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'users',
+    'drf_spectacular',
+    'corsheaders',
 ]
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Your Project API',
+    'DESCRIPTION': 'Your project description',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -47,6 +59,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'final.urls'
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {
@@ -130,7 +144,7 @@ from datetime import timedelta
 ...
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
@@ -158,7 +172,7 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",
 
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=20),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 
     "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",

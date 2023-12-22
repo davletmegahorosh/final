@@ -2,9 +2,8 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 from django.utils.crypto import get_random_string
 from django.contrib.auth import get_user_model
-from translater.models import TeacherGroup
-
-from final import (settings)
+# from translater.models import TeacherGroup
+from final import settings
 
 
 class CustomUsers(AbstractUser):
@@ -12,7 +11,7 @@ class CustomUsers(AbstractUser):
     confirmation_code = models.CharField(max_length=20, blank=True)
 
     # Add related_name to avoid clashes with auth.User.groups
-    groups = models.ManyToManyField(TeacherGroup, blank=True, related_name='custom_users_groups')
+    groups = models.ManyToManyField('translater.TeacherGroup', blank=True, related_name='custom_users_groups')
 
     # Add related_name to avoid clashes with auth.User.user_permissions
     user_permissions = models.ManyToManyField(Permission, blank=True, related_name='custom_users_permissions')

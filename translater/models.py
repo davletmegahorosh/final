@@ -1,6 +1,6 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from final.users.models import CustomUsers
+from users.models import CustomUsers
 
 
 class TeacherGroup(models.Model):

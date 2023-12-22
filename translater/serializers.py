@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import TeacherGroup, Lesson, Word, Test, TestQuestion
+from .models import TeacherGroup, Lesson, Word, Test, TestQuestion, TestResult
 
 
 class TeacherGroupSerializer(serializers.ModelSerializer):
@@ -24,6 +24,7 @@ class TestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
         fields = '__all__'
+        depth = 1
 
 
 class TestQuestionSerializer(serializers.ModelSerializer):
@@ -35,4 +36,11 @@ class TestQuestionSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
-        fields = 'id original_word'.split()
+        fields = ['id', 'original_word']
+
+class TestResultSerializer(serializers.ModelSerializer):
+    test = TestSerializer()
+
+    class Meta:
+        model = TestResult
+        fields = ['user', 'test', 'mark']

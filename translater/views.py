@@ -8,7 +8,8 @@ from .serializers import (
     WordSerializer,
     TestSerializer,
     TestQuestionSerializer,
-    QuestionSerializer
+    QuestionSerializer, TestResultSerializer,
+
 )
 
 
@@ -41,29 +42,44 @@ class LessonViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'No pk provided'})
 
-class TestDuration(views.ApiView):
-    def get(self, pk):
+class TestDuration(views.APIView):
+    def get(self, request, pk):
         test = Test.objects.get(id=pk)
-        questions = Word.objects.filter(id = pk)
+        words = Word.objects.filter(lesson=test.lesson)
         test_serializer = TestSerializer(test)
-        question_serializer = QuestionSerializer(questions)
-        return Response({"test" : test_serializer,
-                         "questions" : question_serializer})
+        question_serializer = QuestionSerializer(words, many=True)
+
+        return Response({"test": test_serializer.data, "questions": question_serializer.data})
+
     def post(self, request, pk):
         answers = request.data
         c = 0
-        point = 100/len(answers.keys)
-        for question, ans in answers:
-            tq = Word.objects.get(id=question)
+        point = 100 / len(answers)
+
+        test = Test.objects.get(id=pk)
+
+        existing_result = TestResult.objects.filter(user=request.user, test=test)
+        if existing_result.exists():
+            return Response({"error": "You have already taken this test."}, status=400)
+
+        for question_id, user_answer in answers.items():
+            try:
+                tq = Word.objects.get(id=question_id)
+            except Word.DoesNotExist:
+                return Response({"error": f"Word with ID {question_id} does not exist."}, status=400)
+
             word_serializer = WordSerializer(tq)
-            if word_serializer.translation == ans:
-                c+=1
+
+            if word_serializer.data['translation'] == user_answer:
+                c += 1
+
         TestResult.objects.create(
-            user = request.user,
-            lesson = pk,
-            mark = point*c
+            user=request.user,
+            test=test,
+            mark=point * c
         )
-        return Response({"your results : " : c*point})
+
+        return Response({"your results: ": c * point})
 
 
 
@@ -97,7 +113,7 @@ class TestDuration(views.ApiView):
 #     serializer_class = TestSerializer
 
 class TestViewSet(viewsets.ModelViewSet):
-    serializers_class = TestSerializer
+    serializer_class = TestResultSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -106,11 +122,12 @@ class TestViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         pk = self.kwargs.get("pk")
         if pk:
-            test =TestQuestion.objects.filter(test__id=pk)
-            serializer = TestSerializer(test)
-            return Response({'test': serializer.data})
+            test_questions = TestQuestion.objects.filter(test__id=pk)
+            serializer = TestQuestionSerializer(test_questions, many=True)
+            return Response({'test_questions': serializer.data})
         else:
             return Response({'error': 'No pk provided'})
+
 
 
 class TestQuestionListCreateAPIView(generics.ListCreateAPIView):
